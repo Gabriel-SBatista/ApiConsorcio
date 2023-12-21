@@ -27,8 +27,10 @@ public class Lead
     [MaxLength(30)]
     public string? City { get; set; }
     [Required]
+    [MaxLength(30)]
     public string? Source { get; set; }
     [Required]
+    [MaxLength(30)]
     public string? Campaign { get; set; }
     [Required]
     public DateTime? DateLead { get; set; }

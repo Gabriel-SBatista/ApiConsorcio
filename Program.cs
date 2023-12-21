@@ -1,9 +1,11 @@
 using ApiConsorcio.Context;
+using ApiConsorcio.Filters;
 using ApiConsorcio.Models;
 using ApiConsorcio.Repositories;
 using ApiConsorcio.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -24,7 +26,19 @@ builder.Services.AddScoped<LeadsRepository>();
 builder.Services.AddScoped<CompaniesService>();
 builder.Services.AddScoped<CompaniesRepository>();
 builder.Services.AddScoped<ExcelService>();
+builder.Services.AddScoped<ExportService>();
+builder.Services.AddScoped<ExportRepository>();
 builder.Services.AddScoped<IValidator<Lead>, LeadValidator>();
+builder.Services.AddScoped<IAsyncAuthorizationFilter, AuthorizationFilter>();
+builder.Services.AddScoped<EmailService>(provider =>
+{
+    string smtpServer = builder.Configuration["Smtp:Server"];
+    int smtpPort = int.Parse(builder.Configuration["Smtp:Port"]);
+    string smtpUsername = builder.Configuration["Smtp:Username"];
+    string smtpPassword = builder.Configuration["Smtp:Password"];
+
+    return new EmailService(smtpServer, smtpPort, smtpUsername, smtpPassword);
+});
 
 builder.Services.AddAuthentication(options =>
 {

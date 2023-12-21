@@ -11,6 +11,12 @@ public class ExportService
         _repository = repository;
     }
 
+    public async Task<List<Export>> SearchExports()
+    {
+        var exports = await _repository.GetAll();
+        return exports;
+    }
+
     public async Task Create(Export export)
     {
         await _repository.Add(export);

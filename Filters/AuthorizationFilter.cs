@@ -1,32 +1,40 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+﻿using ApiConsorcio.Models;
+using Microsoft.AspNetCore.Mvc.Filters;
 using System.Text;
 
 namespace ApiConsorcio.Filters;
 
 public class AuthorizationFilter : Attribute, IAsyncAuthorizationFilter
 {
-    public async Task OnAuthorizationAsync(AuthorizationFilterContext filterContext)
-    {
-        var token = filterContext.HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+    private readonly IConfiguration _configuration;
 
-        if (token == null)
+    public AuthorizationFilter(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
+    public async Task OnAuthorizationAsync(AuthorizationFilterContext filterContext)
+    {     
+        var token = new Token();
+
+        token.Key = filterContext.HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+        if (token.Key == null)
         {
             filterContext.Result = new Microsoft.AspNetCore.Mvc.ForbidResult();
         }
 
-        string dataToSend = "{\"key\": \"" + token + "\"}";
-
-        HttpContent content = new StringContent(dataToSend, Encoding.UTF8, "application/json");
-
         var client = new HttpClient();
 
-        HttpResponseMessage response = await client.PostAsync("https://localhost:7006/usuarios/validacao", content);      
+        HttpResponseMessage response = await client.PostAsJsonAsync(_configuration["AuthorizationApi"], token);
 
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             filterContext.Result = new Microsoft.AspNetCore.Mvc.ForbidResult();
         }
 
-        filterContext.HttpContext.Items["UserId"] = response.Content.ToString();
+        var userId = await response.Content.ReadAsStringAsync();
+
+        filterContext.HttpContext.Items["UserId"] = userId;
     }
 }

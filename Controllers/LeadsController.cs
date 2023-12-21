@@ -1,7 +1,6 @@
 ﻿using ApiConsorcio.Filters;
 using ApiConsorcio.Models;
 using ApiConsorcio.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiConsorcio.Controllers;
@@ -19,7 +18,7 @@ public class LeadsController : ControllerBase
     }
 
     [HttpGet("leads")]
-    [AuthorizationFilter]
+    //[TypeFilter(typeof(AuthorizationFilter))]
     public async Task<ActionResult> Get()
     {
 
@@ -32,14 +31,14 @@ public class LeadsController : ControllerBase
     }
 
     [HttpGet("leads/exportar")]
-    [Authorize] 
+    [TypeFilter(typeof(AuthorizationFilter))] 
     public async Task<ActionResult> GetLeadExcel(DateTime initialDate, DateTime finalDate, bool notExported)
     {
-        var leads = await _leadsService.SearchLeadsForExcel(initialDate, finalDate, notExported);
+        var leads = await _leadsService.SearchLeadsForExport(initialDate, finalDate, notExported);
 
         var excelFile = _excelService.ExportLeadsToExcel(leads);
-        var userId = int.Parse(HttpContext.Items["UserId"].ToString());
-        await _leadsService.UpdateExported(leads, userId);
+        var userId = HttpContext.Items["UserId"] as string;
+        await _leadsService.UpdateExported(leads, int.Parse(userId));
 
         return File(excelFile, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "leads_exportados.xlsx");
     }

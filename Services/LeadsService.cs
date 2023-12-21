@@ -11,12 +11,14 @@ public class LeadsService
     private readonly LeadsRepository _leadsRepository;
     private readonly IValidator<Lead> _leadsValidator;
     private readonly ExportService _exportService;
+    private readonly EmailService _emailService;
 
-    public LeadsService(LeadsRepository leadsRepository, IValidator<Lead> leadsValidator, ExportService exportService)
+    public LeadsService(LeadsRepository leadsRepository, IValidator<Lead> leadsValidator, ExportService exportService, EmailService emailService)
     {
         _leadsRepository = leadsRepository;
         _leadsValidator = leadsValidator;
         _exportService = exportService;
+        _emailService = emailService;
     }
 
     public async Task<IEnumerable<string>?> Create(Lead lead)
@@ -52,6 +54,8 @@ public class LeadsService
         }
 
         await _leadsRepository.Add(lead);
+        await _emailService.SendEmailAsync(lead.Email);
+
         return null;
     }
 
@@ -61,7 +65,7 @@ public class LeadsService
         return leads;
     }
 
-    public async Task<IEnumerable<Lead>> SearchLeadsForExcel(DateTime initialDate, DateTime finalDate, bool notExported)
+    public async Task<IEnumerable<Lead>> SearchLeadsForExport(DateTime initialDate, DateTime finalDate, bool notExported)
     {
         if (notExported)
         {
