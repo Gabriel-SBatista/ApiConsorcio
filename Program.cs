@@ -1,11 +1,9 @@
 using ApiConsorcio.Context;
-using ApiConsorcio.Filters;
 using ApiConsorcio.Models;
 using ApiConsorcio.Repositories;
 using ApiConsorcio.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -20,6 +18,12 @@ builder.Services.AddSwaggerGen();
 
 string postGreConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 
+MongoDBContext.ConnectionString = builder.Configuration.GetSection("MongoConnection:ConnectionString").Value;
+MongoDBContext.DatabaseName = builder.Configuration.GetSection("MongoConnection:DataBase").Value;
+MongoDBContext.IsSSl = Convert.ToBoolean(builder.Configuration.GetSection("MongoConnection:IsSSL").Value);
+
+builder.Services.AddSingleton<MongoDBContext>();
+builder.Services.AddScoped<LeadsMongoRepository>();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(postGreConnection));
 builder.Services.AddScoped<LeadsService>();
 builder.Services.AddScoped<LeadsRepository>();
@@ -29,7 +33,6 @@ builder.Services.AddScoped<ExcelService>();
 builder.Services.AddScoped<ExportService>();
 builder.Services.AddScoped<ExportRepository>();
 builder.Services.AddScoped<IValidator<Lead>, LeadValidator>();
-builder.Services.AddScoped<IAsyncAuthorizationFilter, AuthorizationFilter>();
 builder.Services.AddScoped<EmailService>(provider =>
 {
     string smtpServer = builder.Configuration["Smtp:Server"];

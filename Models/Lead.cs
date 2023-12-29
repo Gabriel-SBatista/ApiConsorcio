@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using MongoDB.Bson;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
@@ -14,7 +15,7 @@ public class Lead
         Exports = new Collection<Export>();
     }
 
-    public int LeadId { get; set; }
+    public ObjectId LeadId { get; set; }
     [Required]
     [MaxLength(20)]
     public string? Name { get; set; }

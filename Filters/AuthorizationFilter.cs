@@ -1,16 +1,16 @@
 ﻿using ApiConsorcio.Models;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System.Text;
+using Newtonsoft.Json;
 
 namespace ApiConsorcio.Filters;
 
 public class AuthorizationFilter : Attribute, IAsyncAuthorizationFilter
 {
-    private readonly IConfiguration _configuration;
+    private readonly string _role;
 
-    public AuthorizationFilter(IConfiguration configuration)
+    public AuthorizationFilter(string role)
     {
-        _configuration = configuration;
+        _role = role;
     }
 
     public async Task OnAuthorizationAsync(AuthorizationFilterContext filterContext)
@@ -26,15 +26,22 @@ public class AuthorizationFilter : Attribute, IAsyncAuthorizationFilter
 
         var client = new HttpClient();
 
-        HttpResponseMessage response = await client.PostAsJsonAsync(_configuration["AuthorizationApi"], token);
+        HttpResponseMessage response = await client.PostAsJsonAsync("https://localhost:7006/usuarios/validacao", token);
 
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             filterContext.Result = new Microsoft.AspNetCore.Mvc.ForbidResult();
         }
 
-        var userId = await response.Content.ReadAsStringAsync();
+        var responseJson = await response.Content.ReadAsStringAsync();
 
-        filterContext.HttpContext.Items["UserId"] = userId;
+        User user = JsonConvert.DeserializeObject<User>(responseJson);
+
+        if (user.Role != _role)
+        {
+            filterContext.Result = new Microsoft.AspNetCore.Mvc.ForbidResult();
+        }
+
+        filterContext.HttpContext.Items["UserId"] = user.UserId;
     }
 }
