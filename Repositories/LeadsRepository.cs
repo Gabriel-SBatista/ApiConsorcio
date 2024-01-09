@@ -1,7 +1,6 @@
 ﻿using ApiConsorcio.Context;
 using ApiConsorcio.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.InteropServices;
 
 namespace ApiConsorcio.Repositories;
 
@@ -26,21 +25,26 @@ public class LeadsRepository
         return leads;
     }
 
-    public async Task<IEnumerable<Lead>> GetByDate(DateTime initialDate, DateTime finalDate, bool? exported)
+    public async Task<IEnumerable<Lead>> GetByCompany(string company)
+    {
+        return await _context.Leads.AsNoTrackingWithIdentityResolution().Where(l => l.Company == company).ToListAsync();
+    }
+
+    public async Task<IEnumerable<Lead>> GetByDate(DateTime initialDate, DateTime finalDate, bool? exported, string userCompany)
     {
         if (exported == true)
         {
-            var leads = await _context.Leads.Where(l => l.DateLead >= initialDate && l.DateLead <= finalDate && l.Exported == true).AsNoTrackingWithIdentityResolution().ToListAsync();
+            var leads = await _context.Leads.Where(l => l.DateLead >= initialDate && l.DateLead <= finalDate && l.Exported == true && l.Company == userCompany).AsNoTrackingWithIdentityResolution().ToListAsync();
             return leads;
         }
         else if (exported == false)
         {
-            var leads = await _context.Leads.Where(l => l.DateLead >= initialDate && l.DateLead <= finalDate && l.Exported == false).AsNoTrackingWithIdentityResolution().ToListAsync();
+            var leads = await _context.Leads.Where(l => l.DateLead >= initialDate && l.DateLead <= finalDate && l.Exported == false && l.Company == userCompany).AsNoTrackingWithIdentityResolution().ToListAsync();
             return leads;
         }
         else
         {
-            var leads = await _context.Leads.Where(l => l.DateLead >= initialDate && l.DateLead <= finalDate).AsNoTrackingWithIdentityResolution().ToListAsync();
+            var leads = await _context.Leads.Where(l => l.DateLead >= initialDate && l.DateLead <= finalDate && l.Company == userCompany).AsNoTrackingWithIdentityResolution().ToListAsync();
             return leads;
         }       
     }

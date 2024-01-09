@@ -9,6 +9,5 @@ public class AppDbContext : DbContext
     {}
 
     public DbSet<Lead> Leads { get; set; }
-    public DbSet<Company> Companys { get; set; }
     public DbSet<Export> Exports { get; set; }
 }

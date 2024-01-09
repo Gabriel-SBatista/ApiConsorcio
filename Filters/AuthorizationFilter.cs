@@ -26,7 +26,7 @@ public class AuthorizationFilter : Attribute, IAsyncAuthorizationFilter
 
         var client = new HttpClient();
 
-        HttpResponseMessage response = await client.PostAsJsonAsync("https://localhost:7006/usuarios/validacao", token);
+        HttpResponseMessage response = await client.PostAsJsonAsync("https://localhost:7006/validacao", token);
 
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
@@ -43,5 +43,6 @@ public class AuthorizationFilter : Attribute, IAsyncAuthorizationFilter
         }
 
         filterContext.HttpContext.Items["UserId"] = user.UserId;
+        filterContext.HttpContext.Items["UserCompany"] = user.Company;
     }
 }

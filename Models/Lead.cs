@@ -15,9 +15,9 @@ public class Lead
         Exports = new Collection<Export>();
     }
 
-    public ObjectId LeadId { get; set; }
+    public int LeadId { get; set; }
     [Required]
-    [MaxLength(20)]
+    [MaxLength(30)]
     public string? Name { get; set; }
     [Required]
     [MaxLength(30)]
@@ -25,7 +25,7 @@ public class Lead
     [Required]
     public long Telephone { get; set; }
     [Required]
-    [MaxLength(30)]
+    [MaxLength(40)]
     public string? City { get; set; }
     [Required]
     [MaxLength(30)]
@@ -37,9 +37,8 @@ public class Lead
     public DateTime? DateLead { get; set; }
     [Required]
     public bool Exported { get; set; }
-    public int CompanyId { get; set; }
-    [JsonIgnore]
-    public Company? Company { get; set; }
+    [Required]
+    public string Company { get; set; }
     [JsonIgnore]
     public ICollection<Export>? Exports { get; set; }
 
@@ -60,8 +59,8 @@ public class LeadValidator : AbstractValidator<Lead>
     public LeadValidator()
     {
         RuleFor(l => l.Email).EmailAddress().WithMessage("Email invalido!");
-        RuleFor(l => l.Name).NotEmpty().MaximumLength(20);
+        RuleFor(l => l.Name).NotEmpty().MaximumLength(30);
         RuleFor(l => l.VerifyTelephone()).Must(v => v == true).NotEmpty().WithMessage("Telefone invalido!");
-        RuleFor(l => l.City).NotEmpty().MaximumLength(30);
+        RuleFor(l => l.City).NotEmpty().MaximumLength(40);
     }
 }

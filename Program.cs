@@ -18,17 +18,9 @@ builder.Services.AddSwaggerGen();
 
 string postGreConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 
-MongoDBContext.ConnectionString = builder.Configuration.GetSection("MongoConnection:ConnectionString").Value;
-MongoDBContext.DatabaseName = builder.Configuration.GetSection("MongoConnection:DataBase").Value;
-MongoDBContext.IsSSl = Convert.ToBoolean(builder.Configuration.GetSection("MongoConnection:IsSSL").Value);
-
-builder.Services.AddSingleton<MongoDBContext>();
-builder.Services.AddScoped<LeadsMongoRepository>();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(postGreConnection));
 builder.Services.AddScoped<LeadsService>();
 builder.Services.AddScoped<LeadsRepository>();
-builder.Services.AddScoped<CompaniesService>();
-builder.Services.AddScoped<CompaniesRepository>();
 builder.Services.AddScoped<ExcelService>();
 builder.Services.AddScoped<ExportService>();
 builder.Services.AddScoped<ExportRepository>();
