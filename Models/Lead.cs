@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace ApiConsorcio.Models;
 
-public class Lead
+public class Lead : Entity
 {
     public Lead()
     {
@@ -15,29 +15,14 @@ public class Lead
         Exports = new Collection<Export>();
     }
 
-    public int LeadId { get; set; }
-    [Required]
-    [MaxLength(30)]
     public string? Name { get; set; }
-    [Required]
-    [MaxLength(30)]
     public string? Email { get; set; }
-    [Required]
     public long Telephone { get; set; }
-    [Required]
-    [MaxLength(40)]
     public string? City { get; set; }
-    [Required]
-    [MaxLength(30)]
     public string? Source { get; set; }
-    [Required]
-    [MaxLength(30)]
     public string? Campaign { get; set; }
-    [Required]
     public DateTime? DateLead { get; set; }
-    [Required]
     public bool Exported { get; set; }
-    [Required]
     public string Company { get; set; }
     [JsonIgnore]
     public ICollection<Export>? Exports { get; set; }

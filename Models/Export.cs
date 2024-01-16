@@ -2,13 +2,14 @@
 
 namespace ApiConsorcio.Models;
 
-public class Export
+public class Export : Entity
 {
-    public int ExportId { get; set; }
-    [Required]
+    public Export()
+    {
+        DateExport = DateTime.UtcNow;
+    }
+
     public int? ExportedBy { get; set; }
-    [Required]
     public DateTime? DateExport { get; set; }
-    public int LeadId { get; set; }
     public Lead? Lead { get; set; }
 }

@@ -20,7 +20,7 @@ public class EmailService
 
     public async Task SendEmailAsync(string addressee)
     {
-        string contentHtml = File.ReadAllText("C:\\Git\\HtmlTeste\\index.html");
+        string contentHtml = File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "index.html"));
 
         using (SmtpClient clientSmtp = new SmtpClient(_smtpServer))
         {

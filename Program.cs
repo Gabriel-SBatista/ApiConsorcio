@@ -1,10 +1,12 @@
 using ApiConsorcio.Context;
+using ApiConsorcio.Filters;
 using ApiConsorcio.Models;
 using ApiConsorcio.Repositories;
 using ApiConsorcio.Services;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +21,19 @@ builder.Services.AddSwaggerGen();
 string postGreConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(postGreConnection));
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<AuthorizationFilterAdmin>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var httpClient = provider.GetService<IHttpClientFactory>();
+    return new AuthorizationFilterAdmin(configuration, httpClient);
+});
+builder.Services.AddScoped<AuthorizationFilterUserCompany>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var httpClient = provider.GetService<IHttpClientFactory>();
+    return new AuthorizationFilterUserCompany(configuration, httpClient);
+});
 builder.Services.AddScoped<LeadsService>();
 builder.Services.AddScoped<LeadsRepository>();
 builder.Services.AddScoped<ExcelService>();

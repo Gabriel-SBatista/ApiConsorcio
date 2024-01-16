@@ -2,7 +2,6 @@
 using ApiConsorcio.Models;
 using ApiConsorcio.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Formats.Asn1;
 
 namespace ApiConsorcio.Controllers;
 
@@ -19,7 +18,7 @@ public class LeadsController : ControllerBase
     }
 
     [HttpGet("leads")]
-    [AuthorizationFilter("Admin")]
+    [TypeFilter(typeof(AuthorizationFilterAdmin))]
     public async Task<ActionResult> Get()
     {
 
@@ -31,12 +30,12 @@ public class LeadsController : ControllerBase
         return Ok(leads);
     }
 
-    [HttpGet("company/leads")]
-    [AuthorizationFilter("Company")]
-    public async Task<ActionResult> GetByCompany()
+    [HttpGet("leads/buscar")]
+    [TypeFilter(typeof(AuthorizationFilterUserCompany))]
+    public async Task<ActionResult> GetByCompany(DateTime? initialDate, DateTime? finalDate, bool? exported)
     {
-        var userCompany = HttpContext.Items["UserCompany"] as string;
-        var leads = await _leadsService.SerachLeadsByCompany(userCompany);
+        var userCompanyName = HttpContext.Items["UserCompanyName"] as string;
+        var leads = await _leadsService.SearchLeadsByCompany(initialDate, finalDate, exported, userCompanyName);
 
         if (leads == null || !leads.Any())
         {
@@ -47,11 +46,11 @@ public class LeadsController : ControllerBase
     }
 
     [HttpGet("leads/exportar")]
-    [AuthorizationFilter("Company")]
-    public async Task<ActionResult> GetLeadExcel(DateTime initialDate, DateTime finalDate, bool? exported)
+    [TypeFilter(typeof(AuthorizationFilterUserCompany))]
+    public async Task<ActionResult> GetLeadExcel(DateTime? initialDate, DateTime? finalDate, bool? exported)
     {
-        var userCompany = HttpContext.Items["UserCompany"] as string;
-        var leads = await _leadsService.SearchLeadsForExport(initialDate, finalDate, exported, userCompany);
+        var userCompanyName = HttpContext.Items["UserCompanyName"] as string;
+        var leads = await _leadsService.SearchLeadsByCompany(initialDate, finalDate, exported, userCompanyName);
 
         var excelFile = _excelService.ExportLeadsToExcel(leads);
         var userId = HttpContext.Items["UserId"] as string;

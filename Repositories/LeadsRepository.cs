@@ -24,29 +24,10 @@ public class LeadsRepository
         var leads = await _context.Leads.AsNoTrackingWithIdentityResolution().ToListAsync();
         return leads;
     }
-
-    public async Task<IEnumerable<Lead>> GetByCompany(string company)
+    public async Task<IEnumerable<Lead>> GetByCompany(DateTime? initialDate, DateTime? finalDate, bool? exported, string userCompany)
     {
-        return await _context.Leads.AsNoTrackingWithIdentityResolution().Where(l => l.Company == company).ToListAsync();
-    }
-
-    public async Task<IEnumerable<Lead>> GetByDate(DateTime initialDate, DateTime finalDate, bool? exported, string userCompany)
-    {
-        if (exported == true)
-        {
-            var leads = await _context.Leads.Where(l => l.DateLead >= initialDate && l.DateLead <= finalDate && l.Exported == true && l.Company == userCompany).AsNoTrackingWithIdentityResolution().ToListAsync();
-            return leads;
-        }
-        else if (exported == false)
-        {
-            var leads = await _context.Leads.Where(l => l.DateLead >= initialDate && l.DateLead <= finalDate && l.Exported == false && l.Company == userCompany).AsNoTrackingWithIdentityResolution().ToListAsync();
-            return leads;
-        }
-        else
-        {
-            var leads = await _context.Leads.Where(l => l.DateLead >= initialDate && l.DateLead <= finalDate && l.Company == userCompany).AsNoTrackingWithIdentityResolution().ToListAsync();
-            return leads;
-        }       
+        var leads = await _context.Leads.Where(l => (l.DateLead >= initialDate && l.DateLead <= finalDate || initialDate == null && finalDate == null) && l.Company == userCompany && (exported == null || l.Exported == exported)).AsNoTrackingWithIdentityResolution().ToListAsync();
+        return leads;     
     }
 
     public async Task UpdateExported(int id)

@@ -1,16 +1,18 @@
 ﻿using ApiConsorcio.Models;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace ApiConsorcio.Filters;
 
-public class AuthorizationFilter : Attribute, IAsyncAuthorizationFilter
+public class AuthorizationFilterAdmin : Attribute, IAsyncAuthorizationFilter
 {
-    private readonly string _role;
+    private readonly IConfiguration _configuration;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public AuthorizationFilter(string role)
+    public AuthorizationFilterAdmin(IConfiguration configuration, IHttpClientFactory httpClientFactory)
     {
-        _role = role;
+        _configuration = configuration;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task OnAuthorizationAsync(AuthorizationFilterContext filterContext)
@@ -24,9 +26,9 @@ public class AuthorizationFilter : Attribute, IAsyncAuthorizationFilter
             filterContext.Result = new Microsoft.AspNetCore.Mvc.ForbidResult();
         }
 
-        var client = new HttpClient();
+        var client = _httpClientFactory.CreateClient();
 
-        HttpResponseMessage response = await client.PostAsJsonAsync("https://localhost:7006/validacao", token);
+        HttpResponseMessage response = await client.PostAsJsonAsync(_configuration.GetSection("AuthorizationApi").Value, token);
 
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
@@ -35,14 +37,14 @@ public class AuthorizationFilter : Attribute, IAsyncAuthorizationFilter
 
         var responseJson = await response.Content.ReadAsStringAsync();
 
-        User user = JsonConvert.DeserializeObject<User>(responseJson);
+        User user = JsonSerializer.Deserialize<User>(responseJson);
 
-        if (user.Role != _role)
+        if (user.role != "Admin")
         {
             filterContext.Result = new Microsoft.AspNetCore.Mvc.ForbidResult();
         }
 
-        filterContext.HttpContext.Items["UserId"] = user.UserId;
-        filterContext.HttpContext.Items["UserCompany"] = user.Company;
+        filterContext.HttpContext.Items["UserId"] = user.userId;
+        filterContext.HttpContext.Items["UserCompany"] = user.company;
     }
 }

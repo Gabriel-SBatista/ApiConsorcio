@@ -42,15 +42,9 @@ public class LeadsService
         return leads;
     }
 
-    public async Task<IEnumerable<Lead>> SerachLeadsByCompany(string company)
+    public async Task<IEnumerable<Lead>> SearchLeadsByCompany(DateTime? initialDate, DateTime? finalDate, bool? exported, string userCompany)
     {
-        var leads = await _leadsRepository.GetByCompany(company);
-        return leads;
-    }
-
-    public async Task<IEnumerable<Lead>> SearchLeadsForExport(DateTime initialDate, DateTime finalDate, bool? exported, string userCompany)
-    {
-        return await _leadsRepository.GetByDate(initialDate, finalDate, exported, userCompany);
+        return await _leadsRepository.GetByCompany(initialDate, finalDate, exported, userCompany);
     }
 
     public async Task UpdateExported(IEnumerable<Lead> leads, int userId)
@@ -58,15 +52,14 @@ public class LeadsService
         foreach (var lead in leads)
         {
             var export = new Export();
-            export.DateExport = DateTime.UtcNow;
             export.ExportedBy = userId;
-            export.LeadId = lead.LeadId;
+            export.Lead = lead;
             
 
             await _exportService.Create(export);
             
             lead.Exported = true;
-            await _leadsRepository.UpdateExported(lead.LeadId);
+            await _leadsRepository.UpdateExported(lead.Id);
         }
     }
 }
