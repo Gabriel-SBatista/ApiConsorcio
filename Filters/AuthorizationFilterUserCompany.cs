@@ -39,12 +39,12 @@ public class AuthorizationFilterUserCompany : Attribute, IAsyncAuthorizationFilt
 
         User user = JsonSerializer.Deserialize<User>(responseJson);
 
-        if (user.role != "Company" && user.role != "Admin")
+        if (user.Role != "Company" && user.Role != "Admin")
         {
             filterContext.Result = new Microsoft.AspNetCore.Mvc.ForbidResult();
         }
 
-        filterContext.HttpContext.Items["UserId"] = user.userId;
-        filterContext.HttpContext.Items["UserCompanyName"] = user.company;
+        filterContext.HttpContext.Items["UserId"] = user.UserId;
+        filterContext.HttpContext.Items["UserCompanyName"] = user.Company;
     }
 }
